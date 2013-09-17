@@ -1,0 +1,72 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+<div id="result" style="width:800px;height:60px;overflow-y:auto;border:1px solid #000000;padding:10px;margin:0 auto;margin-bottom:10px;"></div>
+<div style="display:none;width:800px;height:20px;margin:0 auto;" id="loading">Loading.</div>
+<ul id="list"></ul>
+
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.5.min.js"></script>
+<script>
+// 타이머
+var timer = null;
+
+// 로딩 시작 처리
+function startLoading() {
+	$("#loading").show();
+	
+	timer = setInterval(function() {
+		$("#loading").append(".");
+	},100);
+} 
+
+// 로딩 끝 처리
+function stopLoading() {
+	$("#loading").hide();
+	
+	clearInterval(timer);
+	timer = null;
+}
+
+// 로딩 시작하기
+startLoading();
+
+// Ajax 불러오기
+$.ajax({
+	url: "http://api.flickr.com/services/rest/?method=flickr.interestingness.getList&api_key=bf33166a10d073cf3bc3da53fb4d4ff8&format=json&nojsoncallback=1",
+	type: "get",
+	dataType: "json", // 리턴받을 데이터의 타입 - text, xml 등...
+	data: { // 파라미터		
+	},
+	success: function(data) { // 성공했을 때의 처리 콜백함수
+		$("#result").append("success<br />");
+		
+		$(data.photos.photo).each(function() {
+			// 박스 만들기
+			var html = "<div style='float:left;margin:0 10px 10px 0;'><img src='http://farm"+this.farm+".static.flickr.com/"+this.server+"/"+this.id+"_"+this.secret+"_s.jpg' /></div>";
+			$("#list").append(html);
+			
+			// 박스에 클릭이벤트 정의
+			$("#list").children(":last-child").click(function() {
+				// 페이드 아웃 효과 후 삭제
+				$(this).fadeOut(function() {
+					$(this).remove();
+				});
+			});
+		});		
+	},
+	complete: function() { // ajax 전송이 완료 됐을 때의 콜백함수
+		stopLoading();
+		
+		$("#result").append("complete<br />");
+	},
+	error: function() { // 에러가 발생했을 때의 콜백함수
+		$("#result").append("error<br />");
+	}
+});
+</script>
+</body>
+</html>
